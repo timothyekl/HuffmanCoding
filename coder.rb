@@ -27,6 +27,7 @@ class HuffmanString
   def to_s
     str = "Huffman String\n"
     str += "    Plaintext: #{self.plaintext}\n"
+    str += "    Binary plain: #{self.plaintext.encode("ASCII").bytes.to_a.map{|c| c.to_s(2)}.join}\n"
     str += "    Tree: #{self.tree}\n"
     str += "    Ciphertext: #{self.ciphertext}\n"
 
