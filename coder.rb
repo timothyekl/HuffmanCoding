@@ -27,8 +27,9 @@ class HuffmanString
   def to_s
     str = "Huffman String\n"
     str += "    Plaintext: #{self.plaintext}\n"
-    str += "    Binary plain: #{self.plaintext.encode("ASCII").bytes.to_a.map{|c| c.to_s(2)}.join}\n"
+    str += "    Binary plain: #{self.plaintext.encode("UTF-8").bytes.to_a.map{|c| c.to_s(2)}.join}\n"
     str += "    Tree: #{self.tree}\n"
+    str += "    Binary tree: #{self.tree.to_binary_string}\n"
     str += "    Ciphertext: #{self.ciphertext}\n"
 
     return str
@@ -128,6 +129,10 @@ class HuffmanTree
     return ans.map{|x| x.to_s}.join("")
   end
 
+  def to_binary_string
+    return self.root.to_binary_string
+  end
+
 end
 
 class HuffmanNode
@@ -144,6 +149,14 @@ class HuffmanNode
 
   def to_s
     return "#<HuffmanNode:value=#{self.value},left=#{self.left},right=#{self.right}>"
+  end
+
+  def to_binary_string
+    if self.value.nil?
+      return "0" + self.left.to_binary_string + self.right.to_binary_string
+    else
+      return "1" + self.value.encode("UTF-8").bytes.to_a[0].to_s(2)
+    end
   end
 
 end
