@@ -1,11 +1,11 @@
 class HuffmanCoder
 
   def self.encode(text = "")
-    return HuffmanString.new(text)
+    return HuffmanString::from_plaintext(text)
   end
 
   def self.decode(text = "")
-    raise Exception.new("Unimplemented")
+    return HuffmanString::from_ciphertext(text)
   end
 
 end
@@ -16,12 +16,28 @@ class HuffmanString
   attr_accessor :tree
   attr_accessor :ciphertext
 
-  def initialize(text = "")
-    self.plaintext = text
+  def self.from_plaintext(text = "")
+    s = HuffmanString.new
+    s.plaintext = text
+    return s
+  end
 
-    self.tree = HuffmanTree::build(self.plaintext)
+  def self.from_ciphertext(ciphertext = "")
+    s = HuffmanString.new
+    s.ciphertext = ciphertext
+    return s
+  end
 
-    self.ciphertext = self.tree.encode(self.plaintext)
+  def plaintext=(text)
+    @plaintext = text
+    @tree = HuffmanTree::build(self.plaintext)
+    @ciphertext = self.tree.encode(self.plaintext)
+  end
+
+  def ciphertext=(text)
+    @ciphertext = text
+    @tree = HuffmanTree::parse(self.ciphertext)
+    @plaintext = self.tree.decode(self.ciphertext)
   end
 
   def to_s
@@ -89,6 +105,10 @@ class HuffmanTree
 
   def encode(text = "")
     return text.split("").map{|c|self.binary_path_to(c)}.join("")
+  end
+
+  def decode(ciphertext = "")
+    raise Exception.new("Unimplemented")
   end
 
   def binary_path_to(char = "")
