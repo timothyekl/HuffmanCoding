@@ -4,7 +4,6 @@
 # http://en.nerdaholyc.com/huffman-coding-on-a-string/
 
 require 'optparse'
-require 'pp'
 
 require './coder.rb'
 
