@@ -35,12 +35,16 @@ class HuffmanString
   end
 
   def ciphertext=(text)
-    @ciphertext = text
-    @tree = HuffmanTree::parse(self.ciphertext)
-    @plaintext = self.tree.decode(self.ciphertext)
+    @tree, @ciphertext = HuffmanTree::parse(text)
+    @plaintext = self.tree.decode(self.ciphertext.clone)
   end
 
+  # Overridden to return the completely encoded bit string
   def to_s
+    return self.tree.to_binary_string + self.ciphertext
+  end
+
+  def inspect
     str = "Huffman String\n"
     str += "    Plaintext: #{self.plaintext}\n"
     str += "    Binary plain: #{self.plaintext.encode("UTF-8").bytes.to_a.map{|c| c.to_s(2)}.join}\n"
@@ -96,7 +100,39 @@ class HuffmanTree
   end
 
   def self.parse(str)
-    raise Exception.new("Unimplemented")
+    input = str.clone
+    root = HuffmanNode.new(nil)
+    current = root
+
+    while true
+      code = input.slice!(0, 1)
+      if code == "0"
+        # node has two children
+        current.left = HuffmanNode.new(nil)
+        current.left.parent = current
+        current.right = HuffmanNode.new(nil)
+        current.right.parent = current
+
+        current = current.left
+      elsif code == "1"
+        # node has a value
+        val = input.slice!(0, 8)
+        current.value = Integer("0b" + val).chr
+
+        while current != nil and (current.right.nil? or current.right.full_subtree?)
+          current = current.parent
+        end
+
+        if current.nil? or (current == root and !current.right.value.nil?)
+          break
+        end
+
+        current = current.right
+      end
+    end
+
+    tree = HuffmanTree.new(root)
+    return [tree, input]
   end
 
   def to_s
@@ -108,7 +144,21 @@ class HuffmanTree
   end
 
   def decode(ciphertext = "")
-    raise Exception.new("Unimplemented")
+    current = self.root
+    s = ""
+
+    while ciphertext.length > 0
+      val = ciphertext.slice!(0, 1)
+      current = current.left if val == "0"
+      current = current.right if val == "1"
+
+      if !current.value.nil?
+        s += current.value
+        current = self.root
+      end
+    end
+
+    return s
   end
 
   def binary_path_to(char = "")
@@ -168,15 +218,34 @@ class HuffmanNode
   end
 
   def to_s
-    return "#<HuffmanNode:value=#{self.value},left=#{self.left},right=#{self.right}>"
+    if self.value.nil?
+      if self.left.nil? and self.right.nil?
+        return "nil"
+      else
+        return "#<HuffmanNode:value=#{self.value},left=#{self.left},right=#{self.right}>"
+      end
+    else
+      return self.value
+    end
   end
 
   def to_binary_string
     if self.value.nil?
       return "0" + self.left.to_binary_string + self.right.to_binary_string
     else
-      return "1" + self.value.encode("UTF-8").bytes.to_a[0].to_s(2)
+      bs = self.value.encode("UTF-8").bytes.to_a[0].to_s(2)
+      s = "1" + ("0" * (8 - bs.length) + bs)
+      raise Exception.new("Failed assertion: encoded value string is not nine bits long") if s.length != 9
+      return s
     end
+  end
+
+  def full_subtree?
+    if self.left.nil? and self.right.nil?
+      return !self.value.nil?
+    end
+
+    return (self.left.full_subtree? and self.right.full_subtree?)
   end
 
 end

@@ -29,9 +29,10 @@ end
 
 case options['mode']
   when :encode
-    puts HuffmanCoder::encode(ARGV.join(" "))
+    encoded = HuffmanCoder::encode(ARGV.join(" "))
+    puts encoded.to_s # encoded binary string
   when :decode
-    puts HuffmanCoder::decode(ARGV.join(" "))
+    puts HuffmanCoder::decode(ARGV.join(" ")).plaintext
   else
     puts "Invalid mode"
     Kernel::exit(FALSE)
